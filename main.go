@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -26,6 +27,12 @@ func main() {
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(u)
+
+	if os.Getenv("INSECURE") == "true" {
+		proxy.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
 
 	http.ListenAndServe("0.0.0.0:8766", &BasicAuthProxy{
 		users:   userToPassword,
